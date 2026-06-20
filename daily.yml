@@ -1,0 +1,37 @@
+name: Daily Economy Notion Bot
+
+on:
+  schedule:
+    # 08:30 Asia/Taipei = 00:30 UTC
+    - cron: "30 0 * * 1-6"
+  workflow_dispatch:
+
+jobs:
+  run-daily-bot:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Run bot
+        env:
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          NOTION_TOKEN: ${{ secrets.NOTION_TOKEN }}
+          NOTION_DAILY_DATABASE_ID: ${{ secrets.NOTION_DAILY_DATABASE_ID }}
+          NOTION_MACRO_DATABASE_ID: ${{ secrets.NOTION_MACRO_DATABASE_ID }}
+          NOTION_EARNINGS_DATABASE_ID: ${{ secrets.NOTION_EARNINGS_DATABASE_ID }}
+          NOTION_THESIS_DATABASE_ID: ${{ secrets.NOTION_THESIS_DATABASE_ID }}
+          OPENAI_MODEL: ${{ vars.OPENAI_MODEL || 'gpt-4o-mini' }}
+          TIMEZONE: Asia/Taipei
+        run: python src/main.py
